@@ -10,4 +10,4 @@ Este comando no terminal serve para compilaar o arquivo .java, separando as clas
 
 java SnakeGme
 
-Utilize no terminal para roda o game (ou utilize o run do VSCode)
+Utilize no terminal para rodar o game (ou utilize o run do VSCode)
