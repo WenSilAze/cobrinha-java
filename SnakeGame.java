@@ -64,7 +64,8 @@ class GamePanel extends JPanel implements ActionListener {
             y[i] = 0;
         }
         newApple();
-        timer.setDelay(INITIAL_DELAY); // resetar velocidade
+        timer.stop(); // garante que o timer anterior seja parado
+        timer = new Timer(INITIAL_DELAY, this); // cria novo timer com delay inicial
         timer.start();
         repaint();
     }
@@ -144,8 +145,13 @@ class GamePanel extends JPanel implements ActionListener {
                     int originalDelay = timer.getDelay();
                     timer.setDelay(Math.min(300, timer.getDelay() + 80));
 
-                    // após 5 segundos, restaurar velocidade
-                    new Timer(5000, e -> timer.setDelay(originalDelay)).start();
+                    // após 3 segundos, restaurar velocidade
+                    new Timer(3000, e -> {
+                        if (running) {
+                            timer.setDelay(originalDelay);
+                        }
+                        ((Timer)e.getSource()).stop(); // parar timer auxiliar
+                    }).start();
                     break;
             }
             newApple();
