@@ -140,9 +140,12 @@ class GamePanel extends JPanel implements ActionListener {
                     timer.setDelay(Math.max(50, timer.getDelay() - 10));
                     break;
                 case 2: // venenosa (roxa)
-                    applesEaten = Math.max(0, applesEaten - 2);
-                    // deixa a cobra mais lenta
-                    timer.setDelay(Math.min(300, timer.getDelay() + 50));
+                    // cobra fica mais lenta temporariamente
+                    int originalDelay = timer.getDelay();
+                    timer.setDelay(Math.min(300, timer.getDelay() + 80));
+
+                    // após 5 segundos, restaurar velocidade
+                    new Timer(5000, e -> timer.setDelay(originalDelay)).start();
                     break;
             }
             newApple();
