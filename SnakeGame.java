@@ -27,10 +27,12 @@ class GamePanel extends JPanel implements ActionListener {
     static final int DELAY = 100;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
+    int highScore = 0;
     int bodyParts = 6;
     int applesEaten;
     int appleX;
     int appleY;
+    int appleType = 0; // 0 = normal, 1 = dourada, 2 = venenosa
     char direction = 'R'; // U, D, L, R
     boolean running = false;
     Timer timer;
@@ -73,9 +75,15 @@ class GamePanel extends JPanel implements ActionListener {
 
     public void draw(Graphics g) {
         if (running) {
-            g.setColor(Color.red);
+            // desenhar maçã conforme tipo
+            switch (appleType) {
+                case 0: g.setColor(Color.red); break;      // normal
+                case 1: g.setColor(Color.yellow); break;   // dourada
+                case 2: g.setColor(new Color(128, 0, 128)); break; // venenosa
+            }
             g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
+            // desenhar cobra
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
                     g.setColor(Color.green);
@@ -86,6 +94,7 @@ class GamePanel extends JPanel implements ActionListener {
                 }
             }
 
+            // score
             g.setColor(Color.white);
             g.setFont(new Font("Ink Free", Font.BOLD, 25));
             FontMetrics metrics = getFontMetrics(g.getFont());
@@ -98,8 +107,9 @@ class GamePanel extends JPanel implements ActionListener {
     }
 
     public void newApple() {
-        appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE))*UNIT_SIZE;
-        appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE))*UNIT_SIZE;
+        appleX = random.nextInt((int)(SCREEN_WIDTH/UNIT_SIZE)) * UNIT_SIZE;
+        appleY = random.nextInt((int)(SCREEN_HEIGHT/UNIT_SIZE)) * UNIT_SIZE;
+        appleType = random.nextInt(3); // sorteia entre 0, 1 e 2
     }
 
     public void move() {
@@ -117,8 +127,20 @@ class GamePanel extends JPanel implements ActionListener {
 
     public void checkApple() {
         if (x[0] == appleX && y[0] == appleY) {
-            bodyParts++;
-            applesEaten++;
+            switch (appleType) {
+                case 0: // normal
+                    bodyParts++;
+                    applesEaten++;
+                    break;
+                case 1: // dourada
+                    bodyParts += 2;
+                    applesEaten += 3;
+                    break;
+                case 2: // venenosa
+                    if (bodyParts > 6) bodyParts--; // não deixa a cobra sumir
+                    applesEaten = Math.max(0, applesEaten - 2);
+                    break;
+            }
             newApple();
         }
     }
@@ -129,7 +151,12 @@ class GamePanel extends JPanel implements ActionListener {
         }
         if (x[0] < 0 || x[0] >= SCREEN_WIDTH || y[0] < 0 || y[0] >= SCREEN_HEIGHT) running = false;
 
-        if (!running) timer.stop();
+        if (!running) {
+            timer.stop();
+            if (applesEaten > highScore) {
+                highScore = applesEaten;
+            }
+        }
     }
 
     public void gameOver(Graphics g) {
@@ -139,6 +166,13 @@ class GamePanel extends JPanel implements ActionListener {
         g.drawString("Score: " + applesEaten,
                 (SCREEN_WIDTH - metrics1.stringWidth("Score: " + applesEaten)) / 2,
                 g.getFont().getSize());
+
+        g.setColor(Color.yellow);
+        g.setFont(new Font("Ink Free", Font.BOLD, 30));
+        FontMetrics metricsHS = getFontMetrics(g.getFont());
+        g.drawString("High Score: " + highScore,
+                (SCREEN_WIDTH - metricsHS.stringWidth("High Score: " + highScore)) / 2,
+                g.getFont().getSize() + 40);
 
         g.setColor(Color.red);
         g.setFont(new Font("Ink Free", Font.BOLD, 75));
@@ -170,15 +204,19 @@ class GamePanel extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             switch(e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
+                case KeyEvent.VK_A: // mover para esquerda
                     if (direction != 'R') direction = 'L';
                     break;
                 case KeyEvent.VK_RIGHT:
+                case KeyEvent.VK_D: // mover para direita
                     if (direction != 'L') direction = 'R';
                     break;
                 case KeyEvent.VK_UP:
+                case KeyEvent.VK_W: // mover para cima
                     if (direction != 'D') direction = 'U';
                     break;
                 case KeyEvent.VK_DOWN:
+                case KeyEvent.VK_S: // mover para baixo
                     if (direction != 'U') direction = 'D';
                     break;
                 case KeyEvent.VK_R:
