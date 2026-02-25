@@ -24,7 +24,7 @@ class GamePanel extends JPanel implements ActionListener {
     static final int SCREEN_HEIGHT = 600;
     static final int UNIT_SIZE = 25;
     static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/UNIT_SIZE;
-    static final int DELAY = 100;
+    static final int INITIAL_DELAY = 100;
     final int x[] = new int[GAME_UNITS];
     final int y[] = new int[GAME_UNITS];
     int highScore = 0;
@@ -50,7 +50,7 @@ class GamePanel extends JPanel implements ActionListener {
     public void startGame() {
         newApple();
         running = true;
-        timer = new Timer(DELAY, this);
+        timer = new Timer(INITIAL_DELAY, this);
         timer.start();
     }
 
@@ -64,6 +64,7 @@ class GamePanel extends JPanel implements ActionListener {
             y[i] = 0;
         }
         newApple();
+        timer.setDelay(INITIAL_DELAY); // resetar velocidade
         timer.start();
         repaint();
     }
@@ -135,10 +136,13 @@ class GamePanel extends JPanel implements ActionListener {
                 case 1: // dourada
                     bodyParts += 2;
                     applesEaten += 3;
+                    // deixa a cobra mais rápida
+                    timer.setDelay(Math.max(50, timer.getDelay() - 10));
                     break;
-                case 2: // venenosa
-                    if (bodyParts > 6) bodyParts--; // não deixa a cobra sumir
+                case 2: // venenosa (roxa)
                     applesEaten = Math.max(0, applesEaten - 2);
+                    // deixa a cobra mais lenta
+                    timer.setDelay(Math.min(300, timer.getDelay() + 50));
                     break;
             }
             newApple();
@@ -204,19 +208,19 @@ class GamePanel extends JPanel implements ActionListener {
         public void keyPressed(KeyEvent e) {
             switch(e.getKeyCode()) {
                 case KeyEvent.VK_LEFT:
-                case KeyEvent.VK_A: // mover para esquerda
+                case KeyEvent.VK_A:
                     if (direction != 'R') direction = 'L';
                     break;
                 case KeyEvent.VK_RIGHT:
-                case KeyEvent.VK_D: // mover para direita
+                case KeyEvent.VK_D:
                     if (direction != 'L') direction = 'R';
                     break;
                 case KeyEvent.VK_UP:
-                case KeyEvent.VK_W: // mover para cima
+                case KeyEvent.VK_W:
                     if (direction != 'D') direction = 'U';
                     break;
                 case KeyEvent.VK_DOWN:
-                case KeyEvent.VK_S: // mover para baixo
+                case KeyEvent.VK_S:
                     if (direction != 'U') direction = 'D';
                     break;
                 case KeyEvent.VK_R:
